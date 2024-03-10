@@ -6,4 +6,6 @@
       ansible.builtin.copy:
         src: ../files/index.html
         dest: /home/ansible-worker/www/stud-template/index.html
+        mode: '0644'
       become: yes
+      tags: build_repo
