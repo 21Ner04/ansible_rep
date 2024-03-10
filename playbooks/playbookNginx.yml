@@ -1,0 +1,48 @@
+- hosts: ansible-practic
+  gather_facts: no
+
+  tasks: 
+    - name: install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      become: yes
+      tags: nginx
+
+    - name: Set permissions for www-data group
+      ansible.builtin.file:
+        path: /home/ansible-worker/www
+        owner: www-data
+        group: ansible-worker
+        mode: '0755'
+        recurse: yes
+      become: yes
+      tags: nginx
+    
+    - name: add file configuration file
+      ansible.builtin.copy:
+        src: ../files/ansible_iphilka_ru.conf
+        dest: /etc/nginx/sites-available/ansible.iphilka.ru.conf
+      notify:
+        - restart nginx
+      become: yes
+      tags: nginx
+
+    - name: creat link to configuration file
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/ansible.iphilka.ru.conf
+        dest: /etc/nginx/sites-enabled/ansible.iphilka.ru.conf
+        state: link
+      notify:
+        - restart nginx
+      become: yes
+      tags: nginx
+
+
+  handlers:
+    - name: restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      become: yes
